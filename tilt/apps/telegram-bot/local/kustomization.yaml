@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base
+  - ./resources/secret.yaml
+
+images:
+  - name: botIMAGE
+    newName: rawthil_stdout_bot
+    newTag: dev
