@@ -22,6 +22,10 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 from openai import OpenAI
 import os
+import sys
+sys.path.append('/home/app/code')
+from bot_graph import build_model, build_graph, user_graph_interaction
+
 
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
@@ -45,21 +49,10 @@ if MODEL_NAME == "":
 print(MODEL_NAME)
 
 
-# Custom headers
-custom_headers = {
-    'Authorization': LLM_TOKEN,
-    # "Pocket-Supplier-Whitelist": "pokt19a3t4yunp0dlpfjrp7qwnzwlrzd5fzs2gjaaaj",
-    # "Pocket-Supplier-Whitelist": "pokt13artatl9lf9hr2ut5h74a2aavu7cnjr9y4fml8",
+llm = build_model(LLM_URL, LLM_TOKEN, MODEL_NAME)
 
-}
+graph = build_graph(llm)
 
-
-client = OpenAI(
-    api_key="EMPTY",
-    base_url=LLM_URL,
-    timeout=600
-    
-)
 
 
 
@@ -97,24 +90,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # """Echo the user message."""
     # await update.message.reply_text(update.message.text)
-
-    print(update.message.text)
-
     
-    messages = [{
-        "role": "user",
-        "content": update.message.text
-    },
-    ]
-
-    chat_completion = client.chat.completions.create(messages=messages,
-                                                    model=MODEL_NAME,
-                                                    extra_headers=custom_headers
-                                                    )
-    
-    print(chat_completion)
-
-    await update.message.reply_text(chat_completion.choices[0].message.content)
+    await update.message.reply_text(user_graph_interaction(graph, 1, update.message.text))
 
 
 def main() -> None:
