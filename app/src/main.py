@@ -49,9 +49,17 @@ if MODEL_NAME == "":
 print(MODEL_NAME)
 
 
+
+POSTGRESQL_DB_URI = os.getenv("POSTGRESQL_DB_URI", None)
+if POSTGRESQL_DB_URI is None or len(POSTGRESQL_DB_URI) == 0:
+    print("WARNING: No postgresql URI set, falling back to InMemorySaver!")
+    POSTGRESQL_DB_URI = None
+print(POSTGRESQL_DB_URI)
+
+
 llm = build_model(LLM_URL, LLM_TOKEN, MODEL_NAME)
 
-graph = build_graph(llm)
+graph = build_graph(llm, postgresql_db_uri=POSTGRESQL_DB_URI)
 
 
 

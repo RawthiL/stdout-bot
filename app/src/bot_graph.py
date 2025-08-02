@@ -12,7 +12,10 @@ from typing import Annotated,List,Literal
 from langchain.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langgraph.graph.message import AnyMessage,add_messages,RemoveMessage
 
-memory = InMemorySaver()
+from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg import Connection
+
+
 
 import os
 
@@ -47,7 +50,7 @@ def build_model(model_endpoint, model_token, model_name):
 
 
 
-def build_graph(llm_model):
+def build_graph(llm_model, postgresql_db_uri=None):
     graph_builder = StateGraph(State)
 
     def chat_node(state:State)->State:
@@ -98,8 +101,19 @@ def build_graph(llm_model):
     graph_builder.add_edge(START,"chatnode")
     graph_builder.add_conditional_edges("chatnode",should_continue)
     graph_builder.add_edge("summarize",END)
+
+    if postgresql_db_uri is not None:
+        connection_kwargs = {
+            "autocommit": True,
+            "prepare_threshold": 0,
+        }
+        conn = Connection.connect(postgresql_db_uri, **connection_kwargs)
+        memory = PostgresSaver(conn)
+        memory.setup()
+    else:
+        memory = InMemorySaver()
     
-    return graph_builder.compile(checkpointer=InMemorySaver())
+    return graph_builder.compile(checkpointer=memory)
 
 
 

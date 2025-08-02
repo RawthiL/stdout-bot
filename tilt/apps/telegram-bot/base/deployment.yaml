@@ -38,4 +38,9 @@ spec:
                 secretKeyRef:
                   name: telegram-bot-secret 
                   key: MODEL_NAME
+            - name: POSTGRESQL_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-bot-secret 
+                  key: POSTGRESQL_DB_URI
             
