@@ -1,6 +1,10 @@
 FROM python:3.12-alpine
 
 
+RUN apk update && \
+    apk add --virtual build-deps gcc python3-dev musl-dev && \
+    apk add postgresql-dev
+    
 # create default working directory
 WORKDIR /home/app/code
 

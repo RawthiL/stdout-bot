@@ -26,6 +26,7 @@ SUMMARY_TRIGGER = 15
 class State(TypedDict):
     messages:Annotated[List[AnyMessage],add_messages]
     summary: str
+    user_name: str
 
 
 def build_model(model_endpoint, model_token, model_name):
@@ -55,6 +56,8 @@ def build_graph(llm_model, postgresql_db_uri=None):
 
     def chat_node(state:State)->State:
         system_message=""
+        if state["user_name"] is not None:
+            system_message += f"The user is called \"{state["user_name"]}\"\n"
         summary = state.get("summary", "")
         if summary:
             system_message += f"Summary of previous interactions with user:\n{summary}"
@@ -118,12 +121,13 @@ def build_graph(llm_model, postgresql_db_uri=None):
 
 
 
-def user_graph_interaction(graph, user_id, user_mesage):
+def user_graph_interaction(graph, user_id, user_mesage, user_name=None):
 
     config = {"configurable": {"thread_id": str(user_id)}}
 
     # stream_graph_updates(user_input)
-    input_state={"messages":[user_mesage]}
+    input_state={"messages":[user_mesage], 
+                 "user_name": user_name}
     response_state=graph.invoke(input_state,config=config)
 
     return response_state["messages"][-1].content

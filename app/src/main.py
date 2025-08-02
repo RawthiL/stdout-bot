@@ -99,7 +99,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # """Echo the user message."""
     # await update.message.reply_text(update.message.text)
     
-    await update.message.reply_text(user_graph_interaction(graph, 1, update.message.text))
+    await update.message.reply_text(user_graph_interaction(graph, update.message.from_user.id, update.message.text, user_name=update.message.from_user.first_name))
 
 
 def main() -> None:
